@@ -120,11 +120,11 @@ AI model provides emergency steps based on patient’s condition.
 ---
 
 ## 🔌 **Circuit Diagram**
-![Circuit Diagram](circuit.png)
+![Circuit Diagram](circuit.jpeg)
 
 
 ## 🏗️ System Architecture
-![Architecture Diagram](architecture.png)
+![Architecture Diagram](architecture.jpeg)
 
 ---
 
