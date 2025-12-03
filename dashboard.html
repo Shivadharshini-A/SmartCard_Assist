@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MediAssist – Smart EMR Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <!-- Optional: Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-teal: #0f766e;
+      --primary-mint: #a7f3d0;
+      --primary-soft: #ecfdf5;
+
+      --accent-blue: #38bdf8;
+      --accent-purple: #a855f7;
+      --accent-orange: #fb923c;
+      --accent-rose: #fb7185;
+
+      --bg-body: #f9fafb;
+      --bg-hero-top: #ecfeff;
+      --bg-hero-bottom: #f9fafb;
+
+      --card-border: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, var(--bg-hero-top) 0, var(--bg-body) 45%, #eef2ff 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .dashboard-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .hero-card {
+      background:
+        radial-gradient(circle at top left, rgba(45,212,191,0.35), transparent 55%),
+        linear-gradient(135deg, #ffffff, #f0fdfa);
+      border-radius: 20px;
+      padding: 20px 24px;
+      border: 1px solid rgba(148,163,184,0.4);
+      box-shadow: 0 18px 35px rgba(148,163,184,0.45);
+      color: var(--text-main);
+      margin-bottom: 18px;
+    }
+
+    .hero-title {
+      font-weight: 600;
+      font-size: 1.5rem;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-pill {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.5);
+      padding: 3px 10px;
+      background: #e0f2fe;
+      color: #1e293b;
+    }
+
+    .hero-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .status-line {
+      font-size: 0.8rem;
+      color: var(--primary-teal);
+      margin: 0;
+    }
+
+    .feature-nav {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .feature-btn {
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,0.5);
+      padding: 10px 10px;
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-btn::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      border-radius: 14px 0 0 14px;
+      opacity: 0.85;
+    }
+
+    .feature-btn:nth-child(1)::before { background: var(--primary-teal); }
+    .feature-btn:nth-child(2)::before { background: #16a34a; }
+    .feature-btn:nth-child(3)::before { background: var(--accent-purple); }
+    .feature-btn:nth-child(4)::before { background: var(--accent-orange); }
+
+    .feature-btn span.icon {
+      font-size: 1.1rem;
+    }
+
+    .feature-btn span.label {
+      font-weight: 500;
+      font-size: 0.8rem;
+    }
+
+    .feature-btn span.desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .feature-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(22,163,74,0.9);
+      box-shadow: 0 0 0 1px rgba(45,212,191,0.35), 0 12px 22px rgba(148,163,184,0.65);
+      background: #f9fafb;
+    }
+
+    .feature-btn.active {
+      color: #f9fafb;
+      border-color: transparent;
+      box-shadow: 0 0 0 1px rgba(45,212,191,0.4), 0 16px 30px rgba(148,163,184,0.8);
+      background: linear-gradient(135deg, #0f766e, #22c55e);
+    }
+
+    .feature-btn.active span.desc {
+      color: #e5e7eb;
+    }
+
+    .feature-btn.active::before {
+      opacity: 0;
+    }
+
+    .panel {
+      margin-top: 18px;
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .card-glass {
+      border-radius: 18px;
+      border: 1px solid var(--card-border);
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(148,163,184,0.35);
+      color: var(--text-main);
+    }
+
+    .card-glass .card-header {
+      border-bottom: 1px solid rgba(209,213,219,0.9);
+      background: linear-gradient(135deg, #e0f2fe, #faf5ff);
+      border-radius: 18px 18px 0 0;
+      padding: 10px 14px;
+    }
+
+    .section-title {
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-main);
+    }
+
+    .section-title span.icon {
+      font-size: 1rem;
+    }
+
+    .card-glass .card-body {
+      font-size: 0.8rem;
+      padding: 10px 14px 12px;
+    }
+
+    .badge-status {
+      font-size: 0.7rem;
+      border-radius: 999px;
+    }
+
+    .notes-area,
+    .episodes-table,
+    .chatbox {
+      max-height: 260px;
+      overflow-y: auto;
+      border-radius: 10px;
+      border: 1px solid rgba(209,213,219,0.9);
+      background: #f9fafb;
+    }
+
+    .episodes-table table {
+      margin-bottom: 0;
+    }
+
+    .episodes-table th,
+    .episodes-table td {
+      border-color: rgba(209,213,219,0.9) !important;
+      color: var(--text-main);
+    }
+
+    .episodes-table thead {
+      background: #dcfce7;
+    }
+
+    .episodes-table tbody tr:nth-child(even) {
+      background: #f1f5f9;
+    }
+
+    .chat-msg-user {
+      text-align: right;
+      margin: 6px 6px 0;
+    }
+
+    .chat-msg-bot {
+      text-align: left;
+      margin: 6px 6px 0;
+    }
+
+    .chat-bubble-user {
+      display: inline-block;
+      background: linear-gradient(135deg, #0f766e, #22c55e);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 12px;
+      max-width: 80%;
+      font-size: 0.8rem;
+    }
+
+    .chat-bubble-bot {
+      display: inline-block;
+      background: #ffffff;
+      color: var(--text-main);
+      border: 1px solid rgba(209,213,219,0.9);
+      padding: 6px 10px;
+      border-radius: 12px;
+      max-width: 80%;
+      font-size: 0.8rem;
+    }
+
+    .small-muted {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .diet-list {
+      margin-bottom: 0.25rem;
+      padding-left: 16px;
+    }
+
+    .diet-list li {
+      margin-bottom: 2px;
+    }
+
+    .case-card {
+      border-radius: 12px;
+      border: 1px solid rgba(209,213,219,0.9);
+      padding: 6px 10px;
+      margin-bottom: 8px;
+      background: #fefce8;
+    }
+
+    .case-card:nth-child(2n) {
+      background: #f5f3ff;
+    }
+
+    .case-title {
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    .case-summary {
+      font-size: 0.78rem;
+      color: #4b5563;
+      margin-bottom: 2px;
+    }
+
+    .case-learning {
+      font-size: 0.78rem;
+      margin-bottom: 0;
+      color: #166534;
+    }
+
+    .input-group-sm > .form-control,
+    .form-select-sm {
+      background-color: #ffffff;
+      border-color: rgba(209,213,219,0.9);
+      color: var(--text-main);
+      font-size: 0.8rem;
+    }
+
+    .form-control,
+    .form-select {
+      background-color: #ffffff;
+      border-color: rgba(209,213,219,0.9);
+      color: var(--text-main);
+      font-size: 0.8rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      background-color: #ffffff;
+      border-color: var(--primary-teal);
+      color: var(--text-main);
+      box-shadow: 0 0 0 1px rgba(16,185,129,0.45);
+    }
+
+    textarea.form-control {
+      min-height: 70px;
+    }
+
+    .btn-primary.btn-sm {
+      font-size: 0.8rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #0f766e, #22c55e);
+      border-color: #0f766e;
+    }
+
+    .btn-primary.btn-sm:hover {
+      background: linear-gradient(135deg, #0f766e, #16a34a);
+    }
+
+    .btn-success {
+      border-radius: 999px;
+      padding-inline: 18px;
+      background: linear-gradient(135deg, #22c55e, #0ea5e9);
+      border-color: #16a34a;
+      font-size: 0.8rem;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #16a34a, #0284c7);
+    }
+
+    .btn-outline-secondary {
+      border-radius: 999px;
+      font-size: 0.8rem;
+      border-color: #cbd5f5;
+      color: #4b5563;
+    }
+
+    .btn-outline-secondary:hover {
+      background: #e0f2fe;
+      border-color: #93c5fd;
+      color: #1f2937;
+    }
+
+    .tag-pill {
+      border-radius: 999px;
+      background: #ecfdf5;
+      padding: 2px 8px;
+      border: 1px solid #bbf7d0;
+      font-size: 0.7rem;
+      color: #065f46;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .feature-nav {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .panel .row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-shell py-3 px-2 px-md-0">
+    <!-- HERO / TOP NAV -->
+    <div class="hero-card">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+          <div class="hero-title">
+            <span>🩺 MediAssist</span>
+            <span class="hero-pill">RFID + IoT Smart Patient Dashboard</span>
+          </div>
+          <p class="hero-sub mb-1">
+            Tap a patient card → instantly load lifetime history, diet, AI guidance, and case studies in one screen.
+          </p>
+          <p class="status-line" id="statusLine">
+            Waiting for RFID card tap...
+          </p>
+        </div>
+        <div class="text-end small">
+          <div class="tag-pill mb-1">
+            <span>🧬</span><span>Chronic & Acute Conditions</span>
+          </div><br/>
+          <div class="tag-pill">
+            <span>⚙️</span><span>NodeMCU • Node.js • Gemini AI</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Navigation -->
+      <div class="feature-nav mt-3">
+        <button
+          class="feature-btn active"
+          id="btn-overview"
+          onclick="showPanel('overview')"
+        >
+          <span class="icon">🏥</span>
+          <span class="label">Patient Overview</span>
+          <span class="desc">Identity, history, episodes & current visit</span>
+        </button>
+        <button
+          class="feature-btn"
+          id="btn-dietnotes"
+          onclick="showPanel('dietnotes')"
+        >
+          <span class="icon">🍽</span>
+          <span class="label">Diet & Notes</span>
+          <span class="desc">Disease-specific diet + doctor's notes</span>
+        </button>
+        <button
+          class="feature-btn"
+          id="btn-assistant"
+          onclick="showPanel('assistant')"
+        >
+          <span class="icon">🤖</span>
+          <span class="label">AI Assistant</span>
+          <span class="desc">First-aid & monitoring guidance</span>
+        </button>
+        <button
+          class="feature-btn"
+          id="btn-casestudies"
+          onclick="showPanel('casestudies')"
+        >
+          <span class="icon">📚</span>
+          <span class="label">Case Studies</span>
+          <span class="desc">How similar cases were managed</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PANEL: OVERVIEW -->
+    <div class="panel active" id="panel-overview">
+      <div class="row g-3">
+        <div class="col-md-7">
+          <div class="card card-glass mb-3">
+            <div class="card-header">
+              <h5 class="section-title">
+                <span class="icon">🧾</span> <span>Patient Details</span>
+              </h5>
+            </div>
+            <div class="card-body" id="patientInfo">
+              <p class="text-muted small">No patient selected yet.</p>
+            </div>
+          </div>
+
+          <div class="card card-glass">
+            <div class="card-header">
+              <h5 class="section-title">
+                <span class="icon">📌</span> <span>Medical Summary (Life History)</span>
+              </h5>
+            </div>
+            <div class="card-body" id="medicalSummary">
+              <p class="text-muted small">
+                Life-long history, chronic illnesses, and episodes will appear here after scanning a card.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-5">
+          <div class="card card-glass mb-3">
+            <div class="card-header">
+              <h5 class="section-title">
+                <span class="icon">📆</span> <span>Current Visit & Status</span>
+              </h5>
+            </div>
+            <div class="card-body" id="currentVisitInfo">
+              <p class="text-muted small">
+                When a card is scanned, the current illness (fever, dengue, throat infection, etc.) will appear here.
+              </p>
+            </div>
+          </div>
+
+          <div class="card card-glass">
+            <div class="card-header">
+              <h5 class="section-title">
+                <span class="icon">🗂</span> <span>Past Episodes / Visits</span>
+              </h5>
+            </div>
+            <div class="card-body">
+              <div id="episodesList" class="episodes-table small">
+                <p class="text-muted small m-2">No episodes to show.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: DIET & NOTES -->
+    <div class="panel" id="panel-dietnotes">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card card-glass h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="section-title mb-0">
+                <span class="icon">🍽</span> <span>Diet Plan (Based on Condition)</span>
+              </h5>
+              <button
+                id="downloadDietBtn"
+                class="btn btn-outline-secondary btn-sm"
+                disabled
+              >
+                ⬇️ Download PDF
+              </button>
+            </div>
+            <div class="card-body" id="dietPlan">
+              <p class="text-muted small">
+                Scan a patient card to see a disease-specific diet chart.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card card-glass h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="section-title mb-0">
+                <span class="icon">📝</span> <span>Doctor Notes</span>
+              </h5>
+              <span class="small-muted">
+                UID: <span id="currentUid">None</span>
+              </span>
+            </div>
+            <div class="card-body">
+              <div class="mb-2">
+                <label for="noteText" class="form-label small mb-1">Today's Note / Treatment</label>
+                <textarea
+                  id="noteText"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Describe today's observation, treatment, or plan..."
+                ></textarea>
+              </div>
+              <button id="saveNoteBtn" class="btn btn-primary btn-sm mb-2" disabled>
+                Save Note
+              </button>
+              <hr class="my-2" />
+              <h6 class="small mb-1">Previous Notes</h6>
+              <div id="notesList" class="notes-area small p-2">
+                <p class="text-muted small">No notes yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: AI ASSISTANT -->
+    <div class="panel" id="panel-assistant">
+      <div class="row g-3">
+        <div class="col-md-7">
+          <div class="card card-glass h-100">
+            <div class="card-header">
+              <h5 class="section-title">
+                <span class="icon">🤖</span> <span>AI Chatbot – First Aid & Monitoring</span>
+              </h5>
+            </div>
+            <div class="card-body">
+              <p class="small-muted mb-2">
+                Uses patient disease, condition and history. For nurses, doctors, caretakers and paramedics.
+                Not a replacement for emergency doctor consultation.
+              </p>
+              <div class="chatbox mb-2" id="chatbox">
+                <div class="chat-msg-bot">
+                  <div class="chat-bubble-bot">
+                    👋 I am the MediAssist chatbot. Scan a patient card, then ask about first aid, monitoring, or discharge-style guidance for this patient.
+                  </div>
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label small">Your role</label>
+                <select id="chatRole" class="form-select form-select-sm">
+                  <option value="nurse">Nurse</option>
+                  <option value="doctor">Doctor</option>
+                  <option value="caretaker">Caretaker</option>
+                  <option value="paramedic">Paramedic</option>
+                </select>
+              </div>
+              <div class="input-group input-group-sm mb-1">
+                <input
+                  type="text"
+                  id="chatInput"
+                  class="form-control"
+                  placeholder="Example: What first aid steps for this patient if he has a seizure?"
+                />
+                <button class="btn btn-success" id="chatSendBtn">Ask</button>
+              </div>
+              <div class="small-muted">
+                For emergencies (unconscious, seizure, chest pain), always alert senior doctor and follow hospital protocol.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-5">
+          <div class="card card-glass h-100">
+            <div class="card-header">
+              <h5 class="section-title">
+                <span class="icon">⚙️</span> <span>System Snapshot</span>
+              </h5>
+            </div>
+            <div class="card-body small">
+              <p class="mb-1"><strong>Stack:</strong> NodeMCU • Node.js • Express • Gemini AI</p>
+              <p class="mb-1"><strong>Features:</strong></p>
+              <ul class="mb-2">
+                <li>RFID-based instant patient lookup</li>
+                <li>Chronic & acute disease profiling</li>
+                <li>Doctor notes with live dashboard updates</li>
+                <li>Condition-based diet intelligence</li>
+                <li>AI-assisted first-aid guidance</li>
+                <li>Case-study reference for doctors</li>
+              </ul>
+              <p class="small-muted mb-0">
+                Designed for chronic care wards, ICUs and emergency setups to reduce manual searching and improve decision support.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: CASE STUDIES -->
+    <div class="panel" id="panel-casestudies">
+      <div class="row g-3">
+        <div class="col-md-7">
+          <div class="card card-glass h-100">
+            <div class="card-header">
+              <h5 class="section-title">
+                <span class="icon">📚</span> <span>Case Studies (Similar Conditions)</span>
+              </h5>
+            </div>
+            <div class="card-body" id="caseStudies">
+              <p class="text-muted small">
+                Scan a patient card to see how similar cases were handled.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-5">
+          <div class="card card-glass h-100">
+            <div class="card-header">
+              <h5 class="section-title">
+                <span class="icon">🏁</span> <span>How to Explain in Viva</span>
+              </h5>
+            </div>
+            <div class="card-body small">
+              <p class="mb-1"><strong>Case Study Logic:</strong></p>
+              <ul class="mb-2">
+                <li>We tag each case with conditions (Diabetes, CKD, Dengue, etc.).</li>
+                <li>When a card is scanned, we match patient’s diseases with stored case studies.</li>
+                <li>We then show 4 short case summaries with management and key learnings.</li>
+              </ul>
+              <p class="mb-1"><strong>Why It’s Useful:</strong></p>
+              <ul class="mb-2">
+                <li>Helps junior doctors and students quickly see how similar patients were handled.</li>
+                <li>Supports evidence-based decision making at the bedside.</li>
+              </ul>
+              <p class="small-muted mb-0">
+                This makes the dashboard not only a record system, but also a mini clinical learning platform.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUid = "";
+
+    function showPanel(name) {
+      const panels = ["overview", "dietnotes", "assistant", "casestudies"];
+      panels.forEach((p) => {
+        const panelEl = document.getElementById("panel-" + p);
+        const btnEl = document.getElementById("btn-" + p);
+        if (p === name) {
+          panelEl.classList.add("active");
+          btnEl.classList.add("active");
+        } else {
+          panelEl.classList.remove("active");
+          btnEl.classList.remove("active");
+        }
+      });
+    }
+
+    function escapeHtml(str) {
+      return str
+        .toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function formatMarkdown(str) {
+      const escaped = escapeHtml(str);
+      return escaped.replace(/\n/g, "<br/>").replace(/\*\*/g, "");
+    }
+
+    async function fetchLastScan() {
+      try {
+        const res = await fetch("/api/last-scan");
+        const data = await res.json();
+
+        if (!data || !data.uid) {
+          document.getElementById("statusLine").innerText =
+            "Waiting for RFID card tap...";
+          return;
+        }
+
+        document.getElementById("statusLine").innerText =
+          "Last scanned UID: " +
+          data.uid +
+          (data.authorized ? " (Authorized)" : " (Unauthorized)");
+
+        if (data.uid !== currentUid) {
+          currentUid = data.uid;
+          document.getElementById("currentUid").innerText = currentUid;
+
+          updatePatientInfo(data);
+          updateMedicalSummary(data);
+          updateEpisodes(data);
+          updateCurrentVisit(data);
+          updateDietPlan(data);
+          updateCaseStudies();
+          loadNotes(currentUid);
+
+          const downloadDietBtn = document.getElementById("downloadDietBtn");
+          downloadDietBtn.disabled = !(data.patient && data.patient.dietPlan);
+
+          document.getElementById("saveNoteBtn").disabled = !data.patient;
+
+          if (data.patient) {
+            addBotMessage(
+              "Loaded new patient: " +
+                data.patient.name +
+                ". You can now ask about first aid, monitoring or discharge-style guidance for this case."
+            );
+          } else {
+            addBotMessage(
+              "No patient record found for this UID. Chatbot will have limited information."
+            );
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching last scan:", err);
+      }
+    }
+
+    function updatePatientInfo(data) {
+      const container = document.getElementById("patientInfo");
+      const p = data.patient;
+
+      if (!data.authorized) {
+        container.innerHTML =
+          '<p class="text-danger small">Unauthorized card scanned. No patient linked.</p>';
+        return;
+      }
+
+      if (!p) {
+        container.innerHTML =
+          '<p class="text-warning small">Authorized card but no patient record found.</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="mb-1 d-flex flex-wrap gap-2">
+          <span class="badge bg-success badge-status">Authorized</span>
+          <span class="badge bg-info text-dark badge-status">UID: ${data.uid}</span>
+          <span class="badge bg-secondary badge-status">ID: ${p.id}</span>
+        </div>
+        <p class="mb-1"><strong>Name:</strong> ${p.name}</p>
+        <p class="mb-1"><strong>Age / Gender:</strong> ${p.age} / ${p.gender}</p>
+        <p class="mb-1"><strong>Ward:</strong> ${p.ward}</p>
+        <p class="mb-1"><strong>Admission:</strong> ${p.admitted_from} to ${p.admitted_to}</p>
+        <p class="mb-0"><strong>Overall Disease Summary:</strong> ${p.disease}</p>
+      `;
+    }
+
+    function updateMedicalSummary(data) {
+      const container = document.getElementById("medicalSummary");
+      const p = data.patient;
+      if (!p || !p.medical) {
+        container.innerHTML =
+          '<p class="text-muted small">No structured medical history available.</p>';
+        return;
+      }
+
+      const m = p.medical;
+      const chronicList = (m.chronic || [])
+        .map(
+          (c) => `
+        <li>
+          <strong>${c.name}</strong> (since ${c.diagnosedOn}) – ${c.status}<br/>
+          <span class="text-muted small">${c.remarks}</span>
+        </li>`
+        )
+        .join("");
+
+      const childhood = (m.lifelong?.childhoodIllnesses || [])
+        .map((ill) => `<li>${ill}</li>`)
+        .join("");
+
+      const allergies = (m.lifelong?.allergies || [])
+        .map((a) => `<span class="badge bg-light text-dark me-1">${a}</span>`)
+        .join("");
+
+      container.innerHTML = `
+        <div class="mb-2">
+          <strong>Birth History:</strong>
+          <div>${m.lifelong?.birthHistory || "Not recorded"}</div>
+        </div>
+
+        <div class="mb-2">
+          <strong>Childhood Illnesses:</strong>
+          <ul class="mb-0">${childhood || "<li>Not recorded</li>"}</ul>
+        </div>
+
+        <div class="mb-2">
+          <strong>Vaccination Status:</strong>
+          <div>
+            ${m.lifelong?.vaccinations?.upToDate ? "Up to date" : "Not complete"}
+            <br/>
+            <span class="text-muted small">${
+              m.lifelong?.vaccinations?.notes || ""
+            }</span>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <strong>Allergies:</strong><br/>
+          ${allergies || '<span class="text-muted small">No known allergies recorded.</span>'}
+        </div>
+
+        <div class="mb-0">
+          <strong>Chronic Conditions:</strong>
+          <ul class="mb-0">${chronicList || "<li>None recorded</li>"}</ul>
+        </div>
+      `;
+    }
+
+    function updateEpisodes(data) {
+      const container = document.getElementById("episodesList");
+      const p = data.patient;
+      if (!p || !p.medical || !p.medical.episodes || p.medical.episodes.length === 0) {
+        container.innerHTML =
+          '<p class="text-muted small m-2">No previous episodes recorded.</p>';
+        return;
+      }
+
+      const rows = p.medical.episodes
+        .map(
+          (e) => `
+        <tr>
+          <td>${e.date}</td>
+          <td>${e.type}</td>
+          <td>${e.diagnosis}</td>
+          <td>${e.admitted ? "Yes" : "No"}</td>
+          <td>${e.ward || "-"}</td>
+        </tr>
+      `
+        )
+        .join("");
+
+      container.innerHTML = `
+        <table class="table table-sm table-bordered">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Diagnosis</th>
+              <th>Admitted</th>
+              <th>Ward</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function updateCurrentVisit(data) {
+      const container = document.getElementById("currentVisitInfo");
+      const p = data.patient;
+      if (!p || !p.medical || !p.medical.currentVisit) {
+        container.innerHTML =
+          '<p class="text-muted small">No current visit data available.</p>';
+        return;
+      }
+
+      const v = p.medical.currentVisit;
+
+      const secondaryDiag = (v.currentDiagnosis?.secondary || [])
+        .map((d) => `<span class="badge bg-light text-dark me-1">${d}</span>`)
+        .join("");
+
+      const consultedFor = (v.consultedFor || [])
+        .map((c) => `<li>${c}</li>`)
+        .join("");
+
+      const plan = (v.plan || [])
+        .map((s) => `<li>${s}</li>`)
+        .join("");
+
+      container.innerHTML = `
+        <p class="mb-1"><strong>Visit Date:</strong> ${v.visitDate}</p>
+        <p class="mb-1"><strong>Reason for Visit:</strong> ${v.reasonForVisit}</p>
+        <p class="mb-1"><strong>Primary Diagnosis:</strong> ${v.currentDiagnosis?.primary || "-"}</p>
+        <p class="mb-1"><strong>Other Issues:</strong> ${secondaryDiag || "None specified"}</p>
+        <p class="mb-1"><strong>Current Status:</strong> ${v.currentStatus}</p>
+        <p class="mb-1"><strong>Severity:</strong> ${v.severity}</p>
+        <p class="mb-1"><strong>Complaints / Symptoms:</strong></p>
+        <ul class="mb-1">${consultedFor || "<li>Not specified</li>"}</ul>
+        <p class="mb-1"><strong>Plan:</strong></p>
+        <ul class="mb-0">${plan || "<li>Not specified</li>"}</ul>
+      `;
+    }
+
+    function updateDietPlan(data) {
+      const container = document.getElementById("dietPlan");
+      const p = data.patient;
+      if (!p || !p.dietPlan) {
+        container.innerHTML =
+          '<p class="text-muted small">No diet plan available for this patient.</p>';
+        return;
+      }
+
+      const d = p.dietPlan;
+
+      function listItems(arr) {
+        if (!arr || arr.length === 0) return "<li>Not specified</li>";
+        return arr.map((item) => `<li>${item}</li>`).join("");
+      }
+
+      container.innerHTML = `
+        <p class="mb-1"><strong>Goal:</strong> ${d.goal || "-"}</p>
+        <p class="mb-1"><strong>Calories:</strong> ${d.calories || "-"}</p>
+        <p class="mb-2"><strong>Meal Pattern:</strong> ${d.pattern || "-"}</p>
+
+        <div class="mt-1">
+          <strong>Breakfast:</strong>
+          <ul class="diet-list">
+            ${listItems(d.meals?.breakfast)}
+          </ul>
+        </div>
+
+        <div>
+          <strong>Mid-Morning:</strong>
+          <ul class="diet-list">
+            ${listItems(d.meals?.midMorning)}
+          </ul>
+        </div>
+
+        <div>
+          <strong>Lunch:</strong>
+          <ul class="diet-list">
+            ${listItems(d.meals?.lunch)}
+          </ul>
+        </div>
+
+        <div>
+          <strong>Evening Snack:</strong>
+          <ul class="diet-list">
+            ${listItems(d.meals?.eveningSnack)}
+          </ul>
+        </div>
+
+        <div>
+          <strong>Dinner:</strong>
+          <ul class="diet-list">
+            ${listItems(d.meals?.dinner)}
+          </ul>
+        </div>
+
+        <div class="mt-1">
+          <strong>Avoid:</strong>
+          <ul class="diet-list">
+            ${listItems(d.avoid)}
+          </ul>
+        </div>
+
+        <div class="mt-1">
+          <strong>Extra Notes:</strong>
+          <ul class="diet-list">
+            ${listItems(d.extra)}
+          </ul>
+        </div>
+      `;
+    }
+
+    async function updateCaseStudies() {
+      const container = document.getElementById("caseStudies");
+
+      if (!currentUid) {
+        container.innerHTML =
+          '<p class="text-muted small">Scan a patient card to see similar case studies.</p>';
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          "/api/case-studies?uid=" + encodeURIComponent(currentUid)
+        );
+        const result = await res.json();
+        const items = result.items || [];
+
+        if (!items.length) {
+          container.innerHTML =
+            '<p class="text-muted small">No matching case studies found.</p>';
+          return;
+        }
+
+        container.innerHTML = items
+          .map(
+            (cs) => `
+          <div class="case-card">
+            <div class="case-title">${cs.title}</div>
+            <div class="case-summary">
+              <strong>Summary:</strong> ${cs.summary}
+            </div>
+            <div class="case-summary">
+              <strong>Management:</strong> ${cs.management}
+            </div>
+            <p class="case-learning mb-1">
+              <strong>Key Learnings:</strong>
+            </p>
+            <ul class="mb-1">
+              ${cs.learningPoints
+                .map((p) => `<li>${escapeHtml(p)}</li>`)
+                .join("")}
+            </ul>
+          </div>
+        `
+          )
+          .join("");
+      } catch (err) {
+        console.error("Error loading case studies:", err);
+        container.innerHTML =
+          '<p class="text-muted text-danger small">Could not load case studies.</p>';
+      }
+    }
+
+    async function loadNotes(uid) {
+      if (!uid) return;
+      try {
+        const res = await fetch("/api/notes?uid=" + encodeURIComponent(uid));
+        const notes = await res.json();
+        const container = document.getElementById("notesList");
+
+        if (!notes || notes.length === 0) {
+          container.innerHTML =
+            '<p class="text-muted small">No notes yet for this patient.</p>';
+          return;
+        }
+
+        container.innerHTML = notes
+          .map(
+            (n) => `
+          <div class="border rounded p-2 mb-2" style="border-color: rgba(209,213,219,0.9) !important;">
+            <div class="small-muted">${n.time}</div>
+            <div>${n.text}</div>
+          </div>
+        `
+          )
+          .join("");
+      } catch (err) {
+        console.error("Error loading notes:", err);
+      }
+    }
+
+    async function saveNote() {
+      const noteTextElem = document.getElementById("noteText");
+      const note = noteTextElem.value.trim();
+      if (!currentUid || !note) return;
+
+      try {
+        const res = await fetch("/api/notes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ uid: currentUid, note })
+        });
+        const data = await res.json();
+        if (data.status === "ok") {
+          noteTextElem.value = "";
+          loadNotes(currentUid);
+        } else {
+          alert("Error saving note");
+        }
+      } catch (err) {
+        console.error("Error saving note:", err);
+      }
+    }
+
+    document
+      .getElementById("saveNoteBtn")
+      .addEventListener("click", saveNote);
+
+    // ---- Download Diet Button ----
+    document
+      .getElementById("downloadDietBtn")
+      .addEventListener("click", () => {
+        if (!currentUid) return;
+        window.open(
+          "/api/diet-pdf?uid=" + encodeURIComponent(currentUid),
+          "_blank"
+        );
+      });
+
+    // --------------------- CHATBOT ----------------------
+    const chatbox = document.getElementById("chatbox");
+    const chatInput = document.getElementById("chatInput");
+    const chatSendBtn = document.getElementById("chatSendBtn");
+    const chatRoleSelect = document.getElementById("chatRole");
+
+    function addUserMessage(text) {
+      const div = document.createElement("div");
+      div.className = "chat-msg-user";
+      div.innerHTML = `<span class="chat-bubble-user">${escapeHtml(text)}</span>`;
+      chatbox.appendChild(div);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function addBotMessage(text) {
+      const div = document.createElement("div");
+      div.className = "chat-msg-bot";
+      div.innerHTML = `<span class="chat-bubble-bot">${formatMarkdown(
+        text
+      )}</span>`;
+      chatbox.appendChild(div);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    async function sendChat() {
+      const question = chatInput.value.trim();
+      if (!question) return;
+
+      if (!currentUid) {
+        addBotMessage(
+          "Please scan a patient card first, so I know which patient's case to use."
+        );
+        return;
+      }
+
+      addUserMessage(question);
+      chatInput.value = "";
+      chatInput.disabled = true;
+      chatSendBtn.disabled = true;
+
+      try {
+        const role = chatRoleSelect.value;
+        const res = await fetch("/api/chatbot", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            uid: currentUid,
+            role,
+            question
+          })
+        });
+
+        const data = await res.json();
+        if (data.status === "ok") {
+          addBotMessage(data.answer);
+        } else {
+          addBotMessage(
+            "Error from chatbot: " + (data.message || "Unknown error.")
+          );
+        }
+      } catch (err) {
+        console.error("Chatbot error:", err);
+        addBotMessage("Chatbot failed. Please check server or connection.");
+      } finally {
+        chatInput.disabled = false;
+        chatSendBtn.disabled = false;
+        chatInput.focus();
+      }
+    }
+
+    chatSendBtn.addEventListener("click", sendChat);
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendChat();
+      }
+    });
+
+    // --------------------- POLLING ----------------------
+    setInterval(fetchLastScan, 2000);
+    fetchLastScan();
+  </script>
+</body>
+</html>
